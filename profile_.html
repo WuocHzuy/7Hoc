@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Trang Profile</title>
+  <meta name="description" content="Trang profile cá nhân — HTML/CSS/JS single file, responsive, animation">
+  <style>
+    :root{
+      --bg1: #0f172a;
+      --accent: #7c3aed; /* tím */
+      --glass: rgba(255,255,255,0.06);
+      --glass-2: rgba(255,255,255,0.04);
+      --card-shadow: 0 8px 24px rgba(2,6,23,0.6);
+      --radius: 16px;
+      --maxw: 980px;
+      --text: #e6eef8;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background: radial-gradient(1200px 600px at 10% 10%, #07173b 0%, transparent 8%), radial-gradient(800px 400px at 90% 80%, #1f2937 0%, transparent 10%), linear-gradient(180deg,var(--bg1),#071025); color:var(--text); -webkit-font-smoothing:antialiased}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px}
+
+    /* floating blurred shapes */
+    .blob{position:fixed;filter:blur(48px);opacity:0.22;mix-blend-mode:screen;pointer-events:none}
+    .blob.a{width:420px;height:420px;left:-120px;top:-60px;background:linear-gradient(135deg,#7c3aed,#06b6d4)}
+    .blob.b{width:360px;height:360px;right:-100px;bottom:-80px;background:linear-gradient(135deg,#ef4444,#f97316)}
+
+    .card{width:100%;max-width:var(--maxw);background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border-radius:var(--radius);box-shadow:var(--card-shadow);backdrop-filter: blur(8px);display:grid;grid-template-columns:360px 1fr;gap:28px;padding:28px}
+    @media (max-width:880px){.card{grid-template-columns:1fr;max-width:760px;padding:20px}.left{order:1}.right{order:2}}
+
+    /* Left column (profile) */
+    .left{display:flex;flex-direction:column;align-items:center;padding:14px}
+    .avatar{width:200px;height:200px;border-radius:24px;overflow:hidden;flex-shrink:0;box-shadow:0 12px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.04);position:relative}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1);transition:transform .9s cubic-bezier(.2,.9,.3,1)}
+    .avatar:hover img{transform:scale(1.06) rotate(-1deg)}
+
+    .name{margin-top:16px;font-size:20px;font-weight:700}
+    .role{font-size:13px;opacity:0.8;margin-top:6px}
+    .cta-row{display:flex;gap:10px;margin-top:16px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);cursor:pointer;text-decoration:none;color:var(--text);font-weight:600;transition:transform .18s ease, box-shadow .18s}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{background:linear-gradient(90deg,var(--accent),#06b6d4);color:white;border:none;box-shadow:0 8px 24px rgba(124,58,237,0.18)}
+
+    .socials{display:flex;gap:10px;margin-top:18px}
+    .icon-btn{width:46px;height:46px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--glass-2);border:1px solid rgba(255,255,255,0.03);cursor:pointer;transition:transform .18s, background .18s}
+    .icon-btn:hover{transform:translateY(-6px);background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.04))}
+
+    /* Right column (details) */
+    .right{padding:12px 14px}
+    .headline{font-size:28px;font-weight:800;line-height:1.05;letter-spacing:-0.02em}
+    .lead{margin-top:8px;opacity:0.86}
+
+    /* typing effect */
+    .type{display:inline-block;color:var(--accent);font-weight:700;border-right:2px solid rgba(124,58,237,0.9);padding-right:6px;margin-left:6px}
+
+    .badges{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px}
+    .badge{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.03);font-weight:600}
+
+    .about{margin-top:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:14px;border-radius:12px}
+
+    .skills{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px;margin-top:12px}
+    .skill{display:flex;flex-direction:column;gap:6px}
+    .skill .bar{height:10px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden}
+    .skill .fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#06b6d4);border-radius:999px;transition:width 1s cubic-bezier(.2,.9,.3,1)}
+
+    .links{display:flex;gap:10px;margin-top:18px}
+    .link-card{flex:1;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text)}
+
+    footer{margin-top:18px;text-align:center;opacity:0.7;font-size:13px}
+
+    /* small touches */
+    .copy{cursor:pointer;opacity:0.95}
+    .pulse{animation:pulse 1.8s infinite}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+
+    /* entrance animation */
+    .card{opacity:0;transform:translateY(18px) scale(.995);animation:enter .8s cubic-bezier(.2,.9,.3,1) .08s forwards}
+    @keyframes enter{to{opacity:1;transform:none}}
+
+    /* small responsive */
+    @media (max-width:520px){.avatar{width:140px;height:140px;border-radius:16px}.headline{font-size:22px}}
+  </style>
+</head>
+<body>
+  <div class="blob a" aria-hidden></div>
+  <div class="blob b" aria-hidden></div>
+  <main class="wrap">
+    <article class="card" role="article" aria-labelledby="title">
+
+      <section class="left" aria-label="Profile">
+        <figure class="avatar" aria-hidden="false">
+          <!-- Replace src with your photo or leave as placeholder -->
+          <img src="""C:\Users\Admin\Downloads\avt_pro5.jpg""" alt="Ảnh đại diện">
+        </figure>
+        <div class="name">Bùi Quốc Huy</div>
+        <div class="role">Backend Developer • UX Enthusiast</div>
+
+        <div class="cta-row">
+          <a class="btn primary" id="downloadCv" href="#" role="button" aria-label="Tải CV">Tải CV</a>
+          <button class="btn" id="emailCopy" aria-label="Sao chép email">Sao chép email</button>
+        </div>
+
+        <div class="socials" aria-hidden="false">
+          <a class="icon-btn" href="https://github.com/WuocHzuy" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden focusable="false"><path d="M12 .5C5.73.5.98 5.25.98 11.52c0 4.65 3.02 8.61 7.22 10.01.53.1.72-.23.72-.51 0-.25-.01-.92-.01-1.8-2.94.64-3.56-1.41-3.56-1.41-.48-1.2-1.17-1.52-1.17-1.52-.96-.66.07-.65.07-.65 1.06.08 1.62 1.09 1.62 1.09.94 1.62 2.46 1.15 3.06.88.09-.68.37-1.15.67-1.41-2.35-.27-4.82-1.18-4.82-5.22 0-1.15.41-2.09 1.09-2.83-.11-.27-.48-1.36.1-2.82 0 0 .9-.29 2.95 1.08a10.2 10.2 0 012.68-.36c.91 0 1.83.12 2.68.36 2.05-1.37 2.95-1.08 2.95-1.08.58 1.46.21 2.55.11 2.82.68.74 1.09 1.68 1.09 2.83 0 4.05-2.48 4.95-4.84 5.21.38.33.72.98.72 1.98 0 1.43-.01 2.58-.01 2.93 0 .28.19.62.73.51 4.2-1.4 7.22-5.36 7.22-10.01C23.02 5.25 18.27.5 12 .5z" fill="currentColor"/></svg>
+          </a>
+          <a class="icon-btn" href="https://www.facebook.com/" target="_blank" title="Facebook" aria-label="Facebook">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+    <path d="M22.675 0H1.325C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24h11.495v-9.294H9.691V11.41h3.129V8.708c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.464.099 2.796.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.296h-3.12V24h6.116C23.407 24 24 23.407 24 22.675V1.325C24 .593 23.407 0 22.675 0z" fill="currentColor"/>
+          </a>
+          <a class="icon-btn" href="mailto:buiquochuy.edu@gmail.com" title="Email" aria-label="Email">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5L4 8V6l8 5 8-5v2z" fill="currentColor"/></svg>
+          </a>
+        </div>
+
+        <div style="margin-top:12px;font-size:12px;opacity:0.85">Đang tìm việc — Sẵn sàng nhận dự án freelance</div>
+      </section>
+
+      <section class="right" aria-label="Thông tin">
+        <h1 id="title" class="headline">Xin chào, tôi là <span style="color:var(--accent)">Bùi Quốc Huy</span></h1>
+        <div class="lead">Hiện đang là sinh viên của trường Học Viện Hàng Không Việt Nam<span class="type" id="typeText">VAA</span></div>
+
+        <div class="badges" aria-hidden>
+          <div class="badge">HTML</div>
+          <div class="badge">CSS</div>
+          <div class="badge">JavaScript</div>
+          <div class="badge">React</div>
+          <div class="badge">Sass</div>
+        </div>
+
+        <div class="about">
+          <p style="margin:0">Mô tả: Tôi là một newbie trong ngành IT và đang có định hướng trở thành Backend Developer.</p>
+
+          <div class="skills" style="margin-top:12px">
+            <div class="skill">
+              <div style="font-weight:700">HTML & CSS</div>
+              <div class="bar" aria-hidden><div class="fill" data-fill="92"></div></div>
+            </div>
+            <div class="skill">
+              <div style="font-weight:700">JavaScript</div>
+              <div class="bar" aria-hidden><div class="fill" data-fill="86"></div></div>
+            </div>
+            <div class="skill">
+              <div style="font-weight:700">React</div>
+              <div class="bar" aria-hidden><div class="fill" data-fill="80"></div></div>
+            </div>
+            <div class="skill">
+              <div style="font-weight:700">UI / Animation</div>
+              <div class="bar" aria-hidden><div class="fill" data-fill="78"></div></div>
+            </div>
+          </div>
+
+          <div class="links">
+            <a class="link-card" href="https://portfolio.example.com" target="_blank" rel="noopener noreferrer">
+              <strong>Portfolio</strong>
+              <span style="margin-left:auto;opacity:0.8">Xem</span>
+            </a>
+            <a class="link-card" href="https://drive.google.com/" target="_blank" rel="noopener noreferrer">
+              <strong>Resume / CV</strong>
+              <span style="margin-left:auto;opacity:0.8">Tải</span>
+            </a>
+          </div>
+
+          <footer>© <span id="year"></span> Bùi Quốc Huy — <span style="font-weight:700">Backend</span></footer>
+        </div>
+      </section>
+
+    </article>
+  </main>
+
+  <script>
+    // small JS: typing effect, skill animation, copy email, download CV
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // simple typing loop for 'type' element
+    (function(){
+      const el = document.getElementById('typeText');
+      const words = ['React & animation','UI / UX','Performance tuning','Accessibility'];
+      let idx = 0; let char = 0; let forward = true;
+      function step(){
+        const w = words[idx];
+        if(forward){
+          el.textContent = w.slice(0, ++char);
+          if(char === w.length){ forward = false; setTimeout(step, 900); return }
+        } else {
+          el.textContent = w.slice(0, --char);
+          if(char === 0){ forward = true; idx = (idx+1)%words.length }
+        }
+        setTimeout(step, forward ? 70 : 40);
+      }
+      step();
+    })();
+
+    // animate skill fills on load
+    window.addEventListener('load', ()=>{
+      document.querySelectorAll('.fill').forEach(el=>{
+        const val = el.getAttribute('data-fill')||60;
+        setTimeout(()=>{ el.style.width = val+'%'; }, 180);
+      });
+    });
+
+    // copy email
+    document.getElementById('emailCopy').addEventListener('click', async ()=>{
+      const email = 'buiquochuy.edu@gmail.com';
+      try{
+        await navigator.clipboard.writeText(email);
+        const btn = document.getElementById('emailCopy');
+        const old = btn.innerHTML;
+        btn.innerHTML = 'Đã sao chép ✓';
+        setTimeout(()=> btn.innerHTML = old, 1600);
+      }catch(e){
+        alert('Không thể sao chép. Email: '+email);
+      }
+    });
+
+    // download CV (demo): create a simple text file for download
+    document.getElementById('downloadCv').addEventListener('click', (e)=>{
+      e.preventDefault();
+      const cvText = 'Bùi Quốc Huy\nFrontend Developer\nEmail: hello@example.com\n\nKinh nghiệm:\n- 3+ năm làm Frontend\n';
+      const blob = new Blob([cvText], {type:'text/plain;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'Bui-Quoc-Huy-CV.txt';
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // accessibility: focus outlines for keyboard users
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Tab') document.body.style.outline = 'none';
+    });
+  </script>
+</body>
+</html>
+<!-- GIỮ NGUYÊN TẤT CẢ CODE GỐC PHÍA TRÊN -->
+<style>
+/* 🌟 Hiệu ứng động */
+.fade-up {
+  opacity: 0;
+  transform: translateY(25px);
+  transition: all 0.9s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+.fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 🌟 Hiệu ứng hover nổi cho dự án */
+.extra-info div[style*="background"] {
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.extra-info div[style*="background"]:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 0 20px rgba(255, 177, 0, 0.5);
+}
+</style>
+
+<!-- ... -->
+<div class="about fade-up">
+  <p style="margin:0">Một đoạn mô tả ngắn: I LOVE YOU</p>
+
+  <div class="skills" style="margin-top:12px">
+    <div class="skill">
+      <div style="font-weight:700">HTML & CSS</div>
+      <div class="bar" aria-hidden><div class="fill" data-fill="92"></div></div>
+    </div>
+    <div class="skill">
+      <div style="font-weight:700">JavaScript</div>
+      <div class="bar" aria-hidden><div class="fill" data-fill="86"></div></div>
+    </div>
+    <div class="skill">
+      <div style="font-weight:700">React</div>
+      <div class="bar" aria-hidden><div class="fill" data-fill="80"></div></div>
+    </div>
+    <div class="skill">
+      <div style="font-weight:700">UI / Animation</div>
+      <div class="bar" aria-hidden><div class="fill" data-fill="78"></div></div>
+    </div>
+  </div>
+
+  <!-- 🌟 PHẦN MỚI CÓ HIỆU ỨNG -->
+  <section class="extra-info fade-up" style="margin-top:22px">
+    <h2 style="color:var(--accent);font-size:18px;margin-bottom:6px">Tiểu sử</h2>
+    <p style="opacity:0.9;line-height:1.6">
+      Tôi là Bùi Quốc Huy, sinh viên Học viện Hàng không Việt Nam, theo đuổi đam mê lập trình và phát triển phần mềm. 
+      Tôi yêu thích việc biến ý tưởng thành sản phẩm thực tế, chú trọng tối ưu và trải nghiệm người dùng.
+    </p>
+
+    <h2 style="color:var(--accent);font-size:18px;margin-top:18px;margin-bottom:6px">Học vấn</h2>
+    <ul style="opacity:0.9;line-height:1.6;list-style:none;padding-left:0">
+      <li><strong>Học viện Hàng không Việt Nam</strong> — Chuyên ngành Công nghệ thông tin (2022–2026)</li>
+      <li>Khóa học bổ sung: Node.js Backend Development, RESTful API, Database Design</li>
+    </ul>
+
+    <h2 style="color:var(--accent);font-size:18px;margin-top:18px;margin-bottom:6px">Dự án cá nhân</h2>
+    <div class="fade-up" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+      <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:10px">
+        <strong style="color:var(--accent)">Portfolio cá nhân</strong>
+        <p style="margin:6px 0 0;opacity:0.85;font-size:14px">
+          Trang giới thiệu bản thân, sử dụng HTML, CSS và JS với hiệu ứng động mượt và responsive.
+        </p>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:10px">
+        <strong style="color:var(--accent)">Website bán hàng mini</strong>
+        <p style="margin:6px 0 0;opacity:0.85;font-size:14px">
+          Dự án học tập, mô phỏng trang thương mại điện tử nhỏ với giỏ hàng và thanh toán.
+        </p>
+      </div>
+      <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:10px">
+        <strong style="color:var(--accent)">Ứng dụng ToDo</strong>
+        <p style="margin:6px 0 0;opacity:0.85;font-size:14px">
+          App quản lý công việc cá nhân, lưu dữ liệu với LocalStorage, thiết kế đơn giản, dễ dùng.
+        </p>
+      </div>
+    </div>
+  </section>
+  <!-- 🌟 KẾT THÚC PHẦN MỚI -->
+
+  <div class="links fade-up">
+    <a class="link-card" href="https://portfolio.example.com" target="_blank" rel="noopener noreferrer">
+      <strong>Portfolio</strong>
+      <span style="margin-left:auto;opacity:0.8">Xem</span>
+    </a>
+    <a class="link-card" href="https://drive.google.com/" target="_blank" rel="noopener noreferrer">
+      <strong>Resume / CV</strong>
+      <span style="margin-left:auto;opacity:0.8">Tải</span>
+    </a>
+  </div>
+
+  <footer>© <span id="year"></span> Bùi Quốc Huy — <span style="font-weight:700">Backend</span></footer>
+</div>
+
+<!-- 🌟 SCRIPT THÊM Ở DƯỚI -->
+<script>
+  // Cập nhật năm hiện tại
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Hiệu ứng xuất hiện khi cuộn đến
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll(".fade-up").forEach(el => observer.observe(el));
+</script>
